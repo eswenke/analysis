@@ -8,7 +8,10 @@ import time
 
 
 def preprocess_data(file_path):
-    lazy_rplace = pl.scan_csv(file_path)
+    lazy_rplace = pl.scan_csv(file_path, infer_schema_length=10000, low_memory=True)
+    print(lazy_rplace.schema)
+    
+    return 0
 
     # we need to:
     #   1. add an hour column by extracting the hour from the timestamp column
