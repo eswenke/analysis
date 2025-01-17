@@ -17,6 +17,9 @@ def validate_input(start_date, start_hour, end_date, end_hour):
         raise ValueError("start hour must be before end hour")
     return start, end
 
+def preprocess_data(file_path):
+    lazy_rplace = pl.scan_csv(file_path)
+
 
 def main():
     # start time
@@ -37,13 +40,12 @@ def main():
     start_hour, end_hour = validate_input(start_date, start_hour, end_date, end_hour)
     
     # preprocess data?
-    # 
-    #
-    
+    preprocessed_data = preprocess_data("../week1/2022_place_canvas_history.csv.gzip")
     
     # get end_time
     end_time = time.perf_counter_ns()
 
-    
+    return 0
+
 if __name__ == '__main__':
     main()
