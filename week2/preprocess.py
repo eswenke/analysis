@@ -9,7 +9,10 @@ import time
 
 def preprocess_data(file_path):
     lazy_rplace = pl.scan_csv(file_path, infer_schema_length=10000, low_memory=True)
-    print(lazy_rplace.schema)
+    # print(lazy_rplace.schema()) THIS LINE BREAKS EVERYTHING, RUNS OUT OF MEMORY FAST
+    # need to find a way to preprocess data that wont break everything. potentially
+    # need to try pandas or some other way.
+    # check out this link: https://stackoverflow.com/questions/79115891/how-to-optimize-large-csv-processing
     
     return 0
 
