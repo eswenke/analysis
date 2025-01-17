@@ -8,21 +8,29 @@ import time
 
 
 def preprocess_data(file_path):
-    with gzip.open(file_path, mode='rt', encoding='utf-8') as file:
-        reader = csv.DictReader(file)
-        
-        # converting the file to dictionary
-        # by first converting to list
-        # and then converting the list to dict
-        dict_from_csv = dict(list(reader)[0])
-    
-        # making a list from the keys of the dict
-        list_of_column_names = list(dict_from_csv.keys())
-    
-        # displaying the list of column names
-        print("List of column names : ", list_of_column_names)
+    lazy_rplace = pl.scan_csv(file_path)
 
-    # lazy_rplace = pl.scan_csv(file_path)
+    # we need to:
+    #   1. add an hour column by extracting the hour from the timestamp column
+    #   2. group by hour, pixel_color, and coordinates
+    #   3. aggregate the count of each pixel_color and coordinates
+
+    # add hour column
+    lazy_rplace = lazy_rplace.with_columns(
+        (lazy_rplace['timestamp'].dt.hour()).alias('hour')
+    )
+
+    # group by hour, pixel_color, and coordinates and aggregate
+    aggregated_data = lazy_rplace.groupby(['hour', 'pixel_color', 'coordinates']).agg(
+        count_pixel_color=('pixel_color', 'count'),
+        count_coordinates=('coordinates', 'count')
+    )
+
+    print(aggregated_data.head(10))
+
+    # aggregated_data.write_csv('aggregated_data.csv')
+
+    return aggregated_data
     
 
 def main():
