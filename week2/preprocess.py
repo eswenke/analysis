@@ -17,11 +17,11 @@ def preprocess_data(file_path):
 
     # add hour column
     lazy_rplace = lazy_rplace.with_columns(
-        (lazy_rplace['timestamp'].dt.hour()).alias('hour')
+        (pl.col('timestamp').dt.hour()).alias('hour')
     )
 
     # group by hour, pixel_color, and coordinates and aggregate
-    aggregated_data = lazy_rplace.groupby(['hour', 'pixel_color', 'coordinates']).agg(
+    aggregated_data = lazy_rplace.group_by(['hour', 'pixel_color', 'coordinates']).agg(
         count_pixel_color=('pixel_color', 'count'),
         count_coordinates=('coordinates', 'count')
     )
