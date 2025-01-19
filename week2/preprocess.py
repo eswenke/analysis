@@ -15,7 +15,7 @@ def preprocess_data(file_path):
         lazy_processed = (
             df
             # parse the datetime column into a proper datetime type
-            .with_columns(pl.col("timestamp").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S.%f %Z"))
+            .with_columns(pl.col("timestamp").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S.%f %Z").dt.strftime("%Y-%m-%d %H"))
         )
         print(lazy_processed.head(10).collect())
 
