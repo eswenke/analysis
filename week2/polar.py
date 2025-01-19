@@ -19,6 +19,10 @@ def validate_input(start_date, start_hour, end_date, end_hour):
 
 def preprocess_data(file_path):
     lazy_rplace = pl.scan_csv(file_path)
+    # we also need to:
+    #   1. add an hour column by extracting the hour from the timestamp column
+    #   2. group by hour, pixel_color, and coordinates
+    #   3. aggregate the count of each pixel_color and coordinates
 
 
 def main():

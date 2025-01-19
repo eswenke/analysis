@@ -8,35 +8,17 @@ import time
 
 
 def preprocess_data(file_path):
-    lazy_rplace = pl.scan_csv(file_path, infer_schema_length=10000, low_memory=True)
-    # print(lazy_rplace.schema()) THIS LINE BREAKS EVERYTHING, RUNS OUT OF MEMORY FAST
-    # need to find a way to preprocess data that wont break everything. potentially
-    # need to try pandas or some other way.
-    # check out this link: https://stackoverflow.com/questions/79115891/how-to-optimize-large-csv-processing
-    
-    return 0
+    # read the CSV file lazily
+    with gzip.open(file_path, mode='rt', encoding='utf-8') as file:
+        df = pl.scan_csv(file.read())
+        lazy_processed = (
+            df
+            # parse the datetime column into a proper datetime type
+            .with_columns(pl.col("timestamp").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S%.f %Z"))
+        )
+        print(lazy_processed.head(10).collect())    
 
-    # we need to:
-    #   1. add an hour column by extracting the hour from the timestamp column
-    #   2. group by hour, pixel_color, and coordinates
-    #   3. aggregate the count of each pixel_color and coordinates
-
-    # add hour column
-    lazy_rplace = lazy_rplace.with_columns(
-        (pl.col('timestamp').dt.hour()).alias('hour')
-    )
-
-    # group by hour, pixel_color, and coordinates and aggregate
-    aggregated_data = lazy_rplace.group_by(['hour', 'pixel_color', 'coordinates']).agg(
-        count_pixel_color=('pixel_color', 'count'),
-        count_coordinates=('coordinates', 'count')
-    )
-
-    print(aggregated_data.head(10))
-
-    # aggregated_data.write_csv('aggregated_data.csv')
-
-    return aggregated_data
+    return
     
 
 def main():
