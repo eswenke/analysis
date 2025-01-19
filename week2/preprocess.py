@@ -25,7 +25,8 @@ def preprocess_data(file_path):
         processed_df = lazy_processed.collect()
 
         # write the dataframe to a parquet file
-        processed_df.write_parquet("2022_place_canvas_history.parquet")
+        # processed_df.write_parquet("2022_place_canvas_history.parquet")
+        processed_df.write_csv("2022_place_canvas_history_processed.csv")
 
         return
     
