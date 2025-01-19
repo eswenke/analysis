@@ -16,8 +16,8 @@ def preprocess_data(file_path):
             df
             # parse the datetime column into a proper datetime type
             .with_columns(
-                pl.col("timestamp").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S.%f %Z").dt.strftime("%Y-%m-%d %H"),
-                pl.col("user_id").factorize()
+                pl.col("timestamp").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S%.f %Z").dt.strftime("%Y-%m-%d %H"),
+                pl.col("user_id").cast(pl.Categorical).to_physical()
             )
         )
         print(lazy_processed.head(10).collect())
