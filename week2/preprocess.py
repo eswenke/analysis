@@ -20,7 +20,12 @@ def preprocess_data(file_path):
                 pl.col("user_id").cast(pl.Categorical).to_physical()
             )
         )
-        print(lazy_processed.head(10).collect())
+
+        # collect the lazy frame into a dataframe
+        processed_df = lazy_processed.collect()
+
+        # write the dataframe to a parquet file
+        processed_df.write_parquet("2022_place_canvas_history.parquet")
 
         return
     
