@@ -1,9 +1,5 @@
 import polars as pl
-import numpy as np
-import sys
 import gzip
-import csv
-from datetime import datetime
 import time
 import shutil
 
@@ -19,7 +15,7 @@ def preprocess_data(file_path):
         lazy_processed = (
             df
             # parse the datetime column into a proper datetime type
-            .with_columns(pl.col("timestamp").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S"))
+            .with_columns(pl.col("timestamp").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S.%f %Z"))
         )
         print(lazy_processed.head(10).collect())
 
