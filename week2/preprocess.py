@@ -20,8 +20,8 @@ def preprocess_data(file_path):
                 pl.col("user_id").cast(pl.Categorical).to_physical()
             )
         )
-
-        # collect the lazy frame into a dataframe
+        
+        # collect the lazy frame into a dataframe and write to parquet
         processed_df = lazy_processed.collect()
 
         # write the dataframe to a parquet file
