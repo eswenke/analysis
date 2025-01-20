@@ -18,37 +18,17 @@ def validate_input(start_date, start_hour, end_date, end_hour):
 
 
 def get_counts(file_path, start, end):
-
-    start_time = datetime.now()  # recording the start time
-    data = ddb.read_csv("2022_place_canvas_history.csv")
-    print(ddb.sql("select count(*) from data"))
-    end_time = datetime.now()  # recording the end time
-    execution_time = (end_time - start_time).total_seconds()
-    print(f"Execution time: {execution_time} seconds")
-
-    return 0, 0
-
-    # connect
-    con = ddb.connect(":default:")
-
-    # read the CSV file into DuckDB
-    con.execute(f"""
-        CREATE TABLE canvas_data AS
-        SELECT * FROM read_csv_auto('{file_path}')
-    """)
-
-    # query to find the most placed pixel color and coordinate within the time range
-    result = con.execute(f"""
+    data = ddb.read_csv(file_path)
+    result = ddb.sql(f"""
         SELECT pixel_color, coordinate, COUNT(*) AS count
-        FROM canvas_data
+        FROM data
         WHERE timestamp >= '{start}' AND timestamp <= '{end}'
         GROUP BY pixel_color, coordinate
         ORDER BY count DESC
         LIMIT 1
-    """).fetchone()  # fetch top result
-
-    con.close()  # close the connection
-    return result  
+    """).fetchone() 
+        
+    return result[0], result[1]
 
 
 def main():
@@ -71,7 +51,7 @@ def main():
     
     # get color and coord max for given time range
     color, coord = get_counts("2022_place_canvas_history.csv", start, end)
-    
+        
     # get end_time
     end_time = time.perf_counter_ns()
 
