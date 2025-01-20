@@ -16,12 +16,13 @@ def preprocess_data(file_path):
             df
             # parse the datetime column into a proper datetime type
             .with_columns(
-                pl.col("timestamp").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S%.f %Z").dt.strftime("%Y-%m-%d %H"),
+                pl.col("timestamp").str.strptime(pl.Datetime, format="%Y-%m-%d %H:%M:%S%.f %Z").dt.truncate("1h"), #.dt.strftime("%Y-%m-%d %H"),
                 pl.col("user_id").cast(pl.Categorical).to_physical()
             )
+            .collect()
         )
         
-        print(lazy_processed.head(10).collect())
+        lazy_processed.write_csv("2022_place_canvas_history_truncated.csv")
         
         # collect the lazy frame into a dataframe and write to parquet
         # processed_df = lazy_processed.collect()

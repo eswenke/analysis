@@ -55,7 +55,7 @@ def main():
     # validate input and read in data
     start, end = validate_input(start_date, start_hour, end_date, end_hour)
     
-    # preprocess data?
+    # get color and coord max for given time range
     color, coord = get_counts("2022_place_canvas_history.csv", start, end)
     
     # get end_time
