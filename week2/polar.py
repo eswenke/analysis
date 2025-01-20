@@ -17,7 +17,9 @@ def validate_input(start_date, start_hour, end_date, end_hour):
     return start, end
 
 def get_counts(file_path, start, end):
-    lazy_rplace = pl.scan_csv(file_path, low_memory=True, try_parse_dates=True)
+    lazy_rplace = pl.scan_csv(file_path, low_memory=True)
+                              # try_parse_dates=True)
+                              # schema={"timestamp": pl.Datetime, "user_id": pl.String, "pixel_color": pl.String, "coordinate": pl.String})
 
     # filter by timestamp and group by pixel_color and coordinate
     result = (

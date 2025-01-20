@@ -21,9 +21,11 @@ def preprocess_data(file_path):
             )
         )
         
+        print(lazy_processed.head(10).collect())
+        
         # collect the lazy frame into a dataframe and write to parquet
-        processed_df = lazy_processed.collect()
-        processed_df.write_parquet("2022_place_canvas_history.parquet")
+        # processed_df = lazy_processed.collect()
+        # processed_df.write_parquet("2022_place_canvas_history.parquet")
 
         # we need to:
         #   1. add an hour column by extracting the hour from the timestamp column
