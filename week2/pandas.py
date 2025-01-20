@@ -17,7 +17,21 @@ def validate_input(start_date, start_hour, end_date, end_hour):
     return start, end
 
 def get_counts(file_path, start, end):
-    return
+    df = pd.read_csv(file_path)
+
+    # convert the 'timestamp' column to datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+    # filter based on newly converted datetime timestamp
+    filtered_df = df[(df['timestamp'] >= start) & (df['timestamp'] <= end)]
+
+    # group by 'pixel_color' and 'coordinate' and count
+    counts = filtered_df.groupby(['pixel_color', 'coordinate']).size().reset_index(name='count')
+
+    # sort by count in descending order
+    max_counts = counts.sort_values(by='count', ascending=False).head(1)
+
+    return max_counts['pixel_color'].values[0], max_counts['coordinate'].values[0]
 
 
 def main():

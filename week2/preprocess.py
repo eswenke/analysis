@@ -51,8 +51,19 @@ def preprocess_data_lazy(file_path):
     
 def preprocess_data_lazy(file_path): 
     with open(file_path, mode='rt', encoding='utf-8') as f:
-        df = pl.read_csv(f)
+        df = pl.scan_csv(f)
+        
+        print(f"Number of rows in the DataFrame: {df.shape[0]}")    
+
+        return
     
+def preprocess_data_eager(file_path): 
+    with open(file_path, mode='rt', encoding='utf-8') as f:
+        df = pl.read_csv(f)
+        
+        # Print the number of rows
+        print(f"Number of rows in the DataFrame: {df.shape[0]}")    
+        
 def main():
     # get start time
     start_time = time.perf_counter_ns()
@@ -61,7 +72,7 @@ def main():
     # unzip("../week1/2022_place_canvas_history.csv.gzip")
 
     # preprocess data
-    preprocess_data_lazy("2022_place_canvas_history.csv")
+    # preprocess_data_lazy("2022_place_canvas_history.csv")
     preprocess_data_eager("2022_place_canvas_history.csv")
 
     # get end_time
