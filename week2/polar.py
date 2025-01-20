@@ -12,17 +12,27 @@ def validate_input(start_date, start_hour, end_date, end_hour):
     end = datetime.strptime(f"{end_date} {end_hour}", "%Y-%m-%d %H")
 
     # check start date is before end date
-
     if end <= start:
         raise ValueError("start hour must be before end hour")
     return start, end
 
-def preprocess_data(file_path):
-    lazy_rplace = pl.scan_csv(file_path)
-    # we also need to:
-    #   1. add an hour column by extracting the hour from the timestamp column
-    #   2. group by hour, pixel_color, and coordinates
-    #   3. aggregate the count of each pixel_color and coordinates
+def get_counts(file_path, start, end):
+    lazy_rplace = pl.scan_csv(file_path, low_memory=True, try_parse_dates=True)
+
+    # filter by timestamp and group by pixel_color and coordinate
+    result = (
+        lazy_rplace
+        .filter((pl.col("timestamp") >= start) & (pl.col("timestamp") <= end))
+        .group_by(["pixel_color", "coordinate"])
+        .agg(pl.count().alias("count")) 
+        .sort("count", reverse=True)
+        .select(["pixel_color", "coordinate", "count"])  
+        .collect()  
+    )
+
+    most_placed_color = result[0, "pixel_color"]
+    most_placed_coordinate = result[0, "coordinate"]
+    return most_placed_color, most_placed_coordinate
 
 
 def main():
@@ -41,13 +51,18 @@ def main():
     end_hour = sys.argv[4]
 
     # validate input and read in data
-    start_hour, end_hour = validate_input(start_date, start_hour, end_date, end_hour)
+    start, end = validate_input(start_date, start_hour, end_date, end_hour)
     
     # preprocess data?
-    preprocessed_data = preprocess_data("../week1/2022_place_canvas_history.csv.gzip")
+    color, coord = get_counts("../week1/2022_place_canvas_history.csv", start, end)
     
     # get end_time
     end_time = time.perf_counter_ns()
+
+    print(f"time range: {start} to {end}")
+    print(f"execution time: {((end_time - start_time)//1000000)} ms")
+    print(f"most placed color: {color}")
+    print(f"most placed coordinate: {coord}")
 
     return 0
 

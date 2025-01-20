@@ -21,24 +21,27 @@ def preprocess_data(file_path):
             )
         )
         
-        # # collect the lazy frame into a dataframe and write to parquet
-        # processed_df = lazy_processed.collect()
-        # df_grouped.write_parquet("2022_place_canvas_history.parquet")
+        # collect the lazy frame into a dataframe and write to parquet
+        processed_df = lazy_processed.collect()
+        processed_df.write_parquet("2022_place_canvas_history.parquet")
 
-        # group by hour, pixel color, and coordinates, and count the number of occurrences
-        df_grouped = (
-            lazy_processed
-            .group_by(["timestamp", "pixel_color", "coordinate"])  # Adjust the column names as needed
-            .agg([
-                pl.count("pixel_color").alias("pixel_count"),
-                pl.count("coordinate").alias("coordinate_count")
-            ])
-        ).collect()
+        # we need to:
+        #   1. add an hour column by extracting the hour from the timestamp column
+        #   2. group by hour, pixel_color, and coordinates
+        #   3. aggregate the count of each pixel_color and coordinates
+        # df_grouped = (
+        #     lazy_processed
+        #     .group_by(["timestamp", "pixel_color", "coordinate"])  # Adjust the column names as needed
+        #     .agg([
+        #         pl.count("pixel_color").alias("pixel_count"),
+        #         pl.count("coordinate").alias("coordinate_count")
+        #     ])
+        # ).collect()
 
         # write the grouped dataframe to a CSV file
-        df_grouped.write_csv("2022_place_canvas_history_preprocessed_grouped.csv")
+        # df_grouped.write_csv("2022_place_canvas_history_preprocessed_grouped.csv")
 
-        # # write the dataframe to a parquet file
+        # write the dataframe to a parquet file
         # df_grouped.write_parquet("2022_place_canvas_history.parquet")
 
         return
