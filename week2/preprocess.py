@@ -9,7 +9,7 @@ def unzip(file_path):
         with open('2022_place_canvas_history.csv', 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
 
-def preprocess_data(file_path): 
+def preprocess_data_lazy(file_path): 
     with open(file_path, mode='rt', encoding='utf-8') as f:
         df = pl.scan_csv(f)
         lazy_processed = (
@@ -49,6 +49,10 @@ def preprocess_data(file_path):
 
         return
     
+def preprocess_data_lazy(file_path): 
+    with open(file_path, mode='rt', encoding='utf-8') as f:
+        df = pl.read_csv(f)
+    
 def main():
     # get start time
     start_time = time.perf_counter_ns()
@@ -57,7 +61,8 @@ def main():
     # unzip("../week1/2022_place_canvas_history.csv.gzip")
 
     # preprocess data
-    preprocess_data("2022_place_canvas_history.csv")
+    preprocess_data_lazy("2022_place_canvas_history.csv")
+    preprocess_data_eager("2022_place_canvas_history.csv")
 
     # get end_time
     end_time = time.perf_counter_ns()
