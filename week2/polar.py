@@ -24,8 +24,8 @@ def get_counts(file_path, start, end):
         lazy_rplace
         .filter((pl.col("timestamp") >= start) & (pl.col("timestamp") <= end))
         .group_by(["pixel_color", "coordinate"])
-        .agg(pl.count().alias("count")) 
-        .sort("count", reverse=True)
+        .agg(pl.len().alias("count")) 
+        .sort("count", descending=True)
         .select(["pixel_color", "coordinate", "count"])  
         .collect()  
     )
@@ -54,7 +54,7 @@ def main():
     start, end = validate_input(start_date, start_hour, end_date, end_hour)
     
     # preprocess data?
-    color, coord = get_counts("../week1/2022_place_canvas_history.csv", start, end)
+    color, coord = get_counts("2022_place_canvas_history.csv", start, end)
     
     # get end_time
     end_time = time.perf_counter_ns()
