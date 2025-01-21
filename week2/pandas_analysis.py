@@ -15,21 +15,33 @@ def validate_input(start_date, start_hour, end_date, end_hour):
     return start, end
 
 def get_counts(file_path, start, end):
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, usecols=["timestamp", "pixel_color", "coordinate"])
+    print(f"num rows in df: {df.shape[0]}")
+    
+    # try to read in chunks
+    # chunksize = 10 ** 6
+    # for chunk in pd.read_csv(file_path, chunksize=chunksize):
+    #     for index, row in chunk.iterrows():
+    #         print(row)
 
-    # convert the 'timestamp' column to datetime
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    # # crashes here
+    # df = pd.read_csv(file_path)
+    
+    # # convert the 'timestamp' column to datetime
+    # df['timestamp'] = pd.to_datetime(df['timestamp'], format="%Y-%m-%d %H:%M:%S%.f %Z")
+    
+    # # filter based on newly converted datetime timestamp
+    # filtered_df = df[(df['timestamp'] >= start) & (df['timestamp'] <= end)]
+    
+    # # group by 'pixel_color' and 'coordinate' and count
+    # counts = filtered_df.groupby(['pixel_color', 'coordinate']).size().reset_index(name='count')
 
-    # filter based on newly converted datetime timestamp
-    filtered_df = df[(df['timestamp'] >= start) & (df['timestamp'] <= end)]
+    # # sort by count in descending order
+    # max_counts = counts.sort_values(by='count', ascending=False).head(1)
 
-    # group by 'pixel_color' and 'coordinate' and count
-    counts = filtered_df.groupby(['pixel_color', 'coordinate']).size().reset_index(name='count')
-
-    # sort by count in descending order
-    max_counts = counts.sort_values(by='count', ascending=False).head(1)
-
-    return max_counts['pixel_color'].values[0], max_counts['coordinate'].values[0]
+    # return max_counts['pixel_color'].values[0], max_counts['coordinate'].values[0]
+    
+    return 0, 0
 
 
 def main():
