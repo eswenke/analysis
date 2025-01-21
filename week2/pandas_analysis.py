@@ -1,7 +1,5 @@
 import pandas as pd
 import sys
-import gzip
-import csv
 from datetime import datetime
 import time
 
