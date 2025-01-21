@@ -50,6 +50,8 @@ def preprocess_data_lazy(file_path):
         return
     
 def preprocess_data_eager(file_path): 
+    # https://stackoverflow.com/questions/76391681/read-csv-in-chunks-with-polars-efficiently-with-limited-available-ram
+    # try above link to read in with dtypes resolved already, or read_csv_batched
     with open(file_path, mode='rt', encoding='utf-8') as f:
         df = pl.read_csv(f)
         
