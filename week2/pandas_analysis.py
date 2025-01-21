@@ -15,14 +15,23 @@ def validate_input(start_date, start_hour, end_date, end_hour):
     return start, end
 
 def get_counts(file_path, start, end):
-    df = pd.read_csv(file_path, usecols=["timestamp", "pixel_color", "coordinate"])
-    print(f"num rows in df: {df.shape[0]}")
+    # df = pd.read_csv(file_path, usecols=["timestamp", "pixel_color", "coordinate"])
+    # print(f"num rows in df: {df.shape[0]}")
     
-    # try to read in chunks
-    # chunksize = 10 ** 6
-    # for chunk in pd.read_csv(file_path, chunksize=chunksize):
-    #     for index, row in chunk.iterrows():
-    #         print(row)
+    results = []  # List to hold processed data from each chunk
+    # Read the CSV file in chunks
+    for chunk in pd.read_csv(file_path, chunksize=chunksize):
+        # Perform operations on the chunk
+        # For example, let's say we want to count the occurrences of 'pixel_color'
+        processed_chunk = chunk.groupby('pixel_color').size().reset_index(name='count')
+        results.append(processed_chunk)  # Append the processed chunk to results
+
+    # Concatenate all processed chunks into a single DataFrame
+    final_df = pd.concat(results, ignore_index=True)
+
+    # Now you can perform operations on the entire DataFrame
+    final_counts = final_df.groupby('pixel_color').sum().reset_index()
+    print(final_counts)
 
     # # crashes here
     # df = pd.read_csv(file_path)
