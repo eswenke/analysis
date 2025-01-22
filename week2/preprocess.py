@@ -12,16 +12,25 @@ def unzip(file_path):
             shutil.copyfileobj(f_in, f_out)
 
 def process_chunk(chunk):
-    # Convert the string to datetime
-    chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], errors='coerce')
+    # Initialize a list to store parsed timestamps
+    parsed_timestamps = []
 
-    # Format the datetime to YMDH representation as a string
-    chunk['timestamp'] = chunk['timestamp'].dt.strftime('%Y-%m-%d %H:%M')
+    for timestamp in chunk['timestamp']:
+        try:
+            # Attempt to parse with microseconds
+            parsed_time = pd.to_datetime(timestamp, format='%Y-%m-%d %H:%M:%S.%f', errors='raise')
+        except ValueError:
+            try:
+                # Attempt to parse without microseconds
+                parsed_time = pd.to_datetime(timestamp, format='%Y-%m-%d %H:%M:%S', errors='raise')
+            except ValueError:
+                # If both attempts fail, keep the original string
+                parsed_time = timestamp  # or you can choose to set it to None or another placeholder
 
-    try:
-        chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], format='%Y-%m-%d %H:%M:%S.%f').dt.truncate('H')
-    except ValueError:
-        chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], format='%Y-%m-%d %H:%M:%S').dt.truncate('H')
+        parsed_timestamps.append(parsed_time)
+
+    # Assign the parsed timestamps back to the DataFrame
+    chunk['timestamp'] = parsed_timestamps
     
     # Convert 'user_id' column to unique integers
     chunk['user_id'] = chunk['user_id'].astype('category').cat.codes
