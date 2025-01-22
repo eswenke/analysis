@@ -19,16 +19,47 @@ def validate_input(start_date, start_hour, end_date, end_hour):
 
 def get_counts(file_path, start, end):
     data = ddb.read_csv(file_path)
+    
+    # shortest way to do this (implicitly converts timestamps)
+    # result = ddb.sql(f"""
+    #     SELECT pixel_color, coordinate, COUNT(*) AS count
+    #     FROM data
+    #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+    #     GROUP BY pixel_color, coordinate
+    #     ORDER BY count DESC
+    #     LIMIT 1
+    # """).fetchone() 
+    
+    # this does the same thing, just more complicated?
     result = ddb.sql(f"""
-        SELECT pixel_color, coordinate, COUNT(*) AS count
-        FROM data
-        WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-        GROUP BY pixel_color, coordinate
-        ORDER BY count DESC
-        LIMIT 1
-    """).fetchone() 
+            SELECT
+            pixel_color,
+            MAX(color_count) AS color_count,
+            coordinate,
+            MAX(coord_count) AS coord_count
+            FROM (
+                SELECT
+                    pixel_color,
+                    COUNT(pixel_color) AS color_count,
+                    coordinate,
+                    COUNT(coordinate) AS coord_count
+                FROM data
+                WHERE
+                    CAST(timestamp AS TIMESTAMP) >= '{start}' AND
+                    CAST(timestamp AS TIMESTAMP) <= '{end}'
+                GROUP BY
+                    pixel_color, coordinate
+            )
+            GROUP BY
+                pixel_color, coordinate
+            ORDER BY
+                color_count DESC, coord_count DESC
+            LIMIT 1
+            """).fetchall()
+    
+    print(result)
         
-    return result[0], result[1]
+    return result[0][1], result[0][2]
 
 
 def main():
