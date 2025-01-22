@@ -12,7 +12,11 @@ def unzip(file_path):
             shutil.copyfileobj(f_in, f_out)
 
 def process_chunk(chunk):
-    # Convert 'timestamp' column to datetime
+    # Convert the string to datetime
+    chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], errors='coerce')
+
+    # Format the datetime to YMDH representation as a string
+    chunk['timestamp'] = chunk['timestamp'].dt.strftime('%Y-%m-%d %H:%M')
 
     try:
         chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], format='%Y-%m-%d %H:%M:%S.%f').dt.truncate('H')
