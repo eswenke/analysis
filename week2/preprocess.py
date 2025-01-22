@@ -18,14 +18,14 @@ def process_chunk(chunk):
     for timestamp in chunk['timestamp']:
         try:
             # Attempt to parse with microseconds
-            parsed_time = pd.to_datetime(timestamp, format='%Y-%m-%d %H:%M:%S.%f', errors='raise')
+            parsed_time = pd.to_datetime(timestamp, format='%Y-%m-%d %H:%M:%S.%f %Z', errors='raise')
         except ValueError:
             try:
                 # Attempt to parse without microseconds
-                parsed_time = pd.to_datetime(timestamp, format='%Y-%m-%d %H:%M:%S', errors='raise')
+                parsed_time = pd.to_datetime(timestamp, format='%Y-%m-%d %H:%M:%S %Z', errors='raise')
             except ValueError:
                 # If both attempts fail, keep the original string
-                parsed_time = timestamp  # or you can choose to set it to None or another placeholder
+                print("this is fucked")  # or you can choose to set it to None or another placeholder
 
         parsed_timestamps.append(parsed_time)
 
@@ -49,17 +49,17 @@ def preprocess_data_lazy(file_path):
             #convert chunk to arrow table
             table = pa.Table.from_pandas(chunk)
 
-            if write is None:
-                write = pq.ParquetWriter(
+            if writer is None:
+                writer = pq.ParquetWriter(
                     "2022_place_canvas_history.parquet", table.schema, compression='snappy'
                 )
 
-            write.write_table(table)
+            writer.write_table(table)
             print(f"processed chunk {i+1}")
 
     finally:
         if writer:
-            write.close()
+            writer.close()
     
     return
 
