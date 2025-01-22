@@ -14,7 +14,21 @@ def validate_input(start_date, start_hour, end_date, end_hour):
     return start, end
 
 def get_counts(file_path, start, end):
-    return 0, 0
+    df = pd.read_parquet(file_path)
+
+    # filter based on time range
+    filtered_data = df[(df['timestamp'] >= start) & (df['timestamp'] <= end)]
+
+    # get most common pixel_color and coordinate
+    most_placed_color = filtered_data['pixel_color'].value_counts().idxmax()
+    max_pixel_color_count = filtered_data['pixel_color'].value_counts().max()
+    most_placed_coordinate = filtered_data['coordinate'].value_counts().idxmax()
+    max_coordinate_count = filtered_data['coordinate'].value_counts().max()
+
+    print(f"most placed color: {most_placed_color} ({max_pixel_color_count} times)")
+    print(f"most placed coordinate: {most_placed_coordinate} ({max_coordinate_count} times)")
+
+    return most_placed_color, most_placed_coordinate
 
 
 def main():

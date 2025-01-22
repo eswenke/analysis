@@ -17,23 +17,38 @@ def validate_input(start_date, start_hour, end_date, end_hour):
     return start, end
 
 def get_counts(file_path, start, end):
-    lazy_rplace = pl.scan_csv(file_path, low_memory=True)
-    
-    # filter by timestamp and group by pixel_color and coordinate
-    result = (
-        lazy_rplace
-        .filter((pl.col("timestamp") >= start) & (pl.col("timestamp") <= end))
-        .group_by(["pixel_color", "coordinate"])
-        .agg(pl.len().alias("count")) 
+    lazy_rplace = pl.scan_parquet(file_path)
+
+    # filter by timestamp
+    filtered_data = lazy_rplace.filter((pl.col("timestamp") >= start) & (pl.col("timestamp") <= end))
+
+    # count occurrences of pixel_color and get max
+    pixel_color_count = (
+        filtered_data
+        .group_by("pixel_color")
+        .agg(pl.len().alias("count"))
         .sort("count", descending=True)
-        .select(["pixel_color", "coordinate", "count"])  
-        .collect()  
     )
 
-    most_placed_color = result[0, "pixel_color"]
-    most_placed_coordinate = result[0, "coordinate"]
-    return most_placed_color, most_placed_coordinate
+    max_pixel_color = pixel_color_count[0, "pixel_color"]
+    max_pixel_color_count = pixel_color_count[0, "count"]
 
+    # count occurrences of coordinate and get max
+    coordinate_count = (
+        filtered_data
+        .group_by("coordinate")
+        .agg(pl.len().alias("count"))
+        .sort("count", descending=True)
+    )
+
+    max_coordinate = coordinate_count[0, "coordinate"]
+    max_coordinate_count = coordinate_count[0, "count"]
+
+    print(f"Most placed color: {max_pixel_color} ({max_pixel_color_count} times)")
+    print(f"Most placed coordinate: {max_coordinate} ({max_coordinate_count} times)")
+    
+    return max_pixel_color, max_coordinate
+    
 
 def main():
     # start time

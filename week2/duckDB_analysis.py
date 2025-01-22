@@ -11,55 +11,34 @@ def validate_input(start_date, start_hour, end_date, end_hour):
     end = datetime.strptime(f"{end_date} {end_hour}", "%Y-%m-%d %H")
 
     # check start date is before end date
-
     if end <= start:
         raise ValueError("start hour must be before end hour")
     return start, end
 
 
 def get_counts(file_path, start, end):
-    data = ddb.read_csv(file_path)
+    data = ddb.read_parquet(file_path)
     
-    # shortest way to do this (implicitly converts timestamps)
-    # result = ddb.sql(f"""
-    #     SELECT pixel_color, coordinate, COUNT(*) AS count
-    #     FROM data
-    #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-    #     GROUP BY pixel_color, coordinate
-    #     ORDER BY count DESC
-    #     LIMIT 1
-    # """).fetchone() 
-    
-    # this does the same thing, just more complicated?
+    # query to get the max count of pixel_color and coordinate
     result = ddb.sql(f"""
-            SELECT
-            pixel_color,
-            MAX(color_count) AS color_count,
-            coordinate,
-            MAX(coord_count) AS coord_count
-            FROM (
-                SELECT
-                    pixel_color,
-                    COUNT(pixel_color) AS color_count,
-                    coordinate,
-                    COUNT(coordinate) AS coord_count
-                FROM data
-                WHERE
-                    CAST(timestamp AS TIMESTAMP) >= '{start}' AND
-                    CAST(timestamp AS TIMESTAMP) <= '{end}'
-                GROUP BY
-                    pixel_color, coordinate
-            )
-            GROUP BY
-                pixel_color, coordinate
-            ORDER BY
-                color_count DESC, coord_count DESC
-            LIMIT 1
-            """).fetchall()
-    
-    print(result)
-        
-    return result[0][1], result[0][2]
+        WITH pixel_color_counts AS (
+            SELECT pixel_color, COUNT(*) AS count
+            FROM data
+            WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+            GROUP BY pixel_color
+        ),
+        coordinate_counts AS (
+            SELECT coordinate, COUNT(*) AS count
+            FROM data
+            WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+            GROUP BY coordinate
+        )
+        SELECT 
+            (SELECT pixel_color FROM pixel_color_counts ORDER BY count DESC LIMIT 1) AS most_placed_color,
+            (SELECT coordinate FROM coordinate_counts ORDER BY count DESC LIMIT 1) AS most_placed_coordinate
+    """).fetchone()
+
+    return result[0], result[1]
 
 
 def main():
