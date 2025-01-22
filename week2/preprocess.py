@@ -13,7 +13,11 @@ def unzip(file_path):
 
 def process_chunk(chunk):
     # Convert 'timestamp' column to datetime
-    chunk['timestamp'] = pd.to_datetime(chunk['timestamp']).dt.truncate('1h')
+
+    try:
+        chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], format='%Y-%m-%d %H:%M:%S.%f').dt.truncate('H')
+    except ValueError:
+        chunk['timestamp'] = pd.to_datetime(chunk['timestamp'], format='%Y-%m-%d %H:%M:%S').dt.truncate('H')
     
     # Convert 'user_id' column to unique integers
     chunk['user_id'] = chunk['user_id'].astype('category').cat.codes
