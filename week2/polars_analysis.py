@@ -28,7 +28,7 @@ def get_counts(file_path, start, end):
         .group_by("pixel_color")
         .agg(pl.len().alias("count"))
         .sort("count", descending=True)
-    )
+    ).collect()
 
     max_pixel_color = pixel_color_count[0, "pixel_color"]
     max_pixel_color_count = pixel_color_count[0, "count"]
@@ -39,13 +39,10 @@ def get_counts(file_path, start, end):
         .group_by("coordinate")
         .agg(pl.len().alias("count"))
         .sort("count", descending=True)
-    )
+    ).collect()
 
     max_coordinate = coordinate_count[0, "coordinate"]
     max_coordinate_count = coordinate_count[0, "count"]
-
-    print(f"Most placed color: {max_pixel_color} ({max_pixel_color_count} times)")
-    print(f"Most placed coordinate: {max_coordinate} ({max_coordinate_count} times)")
     
     return max_pixel_color, max_coordinate
     
@@ -69,7 +66,7 @@ def main():
     start, end = validate_input(start_date, start_hour, end_date, end_hour)
     
     # get color and coord max for given time range
-    color, coord = get_counts("2022_place_canvas_history.csv", start, end)
+    color, coord = get_counts("2022pyarrow.parquet", start, end)
     
     # get end_time
     end_time = time.perf_counter_ns()

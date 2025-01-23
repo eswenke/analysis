@@ -1,86 +1,71 @@
-import pandas as pd
-import pyarrow as pa
+import pyarrow.csv as pv
 import pyarrow.parquet as pq
-import gzip
-import time
-import shutil
+import pyarrow as pa
+import polars as pl
 
+csv_file = "2022_place_canvas_history.csv"
+parquet_file = "2022pyarrow.parquet"
 
-def unzip(file_path): 
-    with gzip.open(file_path, 'rb') as f_in:
-        with open('2022_place_canvas_history.csv', 'wb') as f_out:
-            shutil.copyfileobj(f_in, f_out)
+DATESTRING_FORMAT = "%Y-%m-%d %H:%M:%S"
+BLOCK_SIZE = 10_000_000
 
-def process_chunk(chunk):
-    # Initialize a list to store parsed timestamps
-    parsed_timestamps = []
+read_options = pv.ReadOptions(block_size=BLOCK_SIZE)
+csv_reader = pv.open_csv(csv_file, read_options=read_options)
 
-    for timestamp in chunk['timestamp']:
-        try:
-            # Attempt to parse with microseconds
-            parsed_time = pd.to_datetime(timestamp, format='%Y-%m-%d %H:%M:%S.%f %Z', errors='raise')
-        except ValueError:
-            try:
-                # Attempt to parse without microseconds
-                parsed_time = pd.to_datetime(timestamp, format='%Y-%m-%d %H:%M:%S %Z', errors='raise')
-            except ValueError:
-                # If both attempts fail, keep the original string
-                print("this is fucked")  # or you can choose to set it to None or another placeholder
+parquet_writer = None
 
-        parsed_timestamps.append(parsed_time)
+try:
+    for record_batch in csv_reader:
+        print(f"Processing batch with {record_batch.num_rows} rows...")
 
-    # Assign the parsed timestamps back to the DataFrame
-    chunk['timestamp'] = parsed_timestamps
-    
-    # Convert 'user_id' column to unique integers
-    chunk['user_id'] = chunk['user_id'].astype('category').cat.codes
-    
-    return chunk
+        df = pl.from_arrow(record_batch)
 
-def preprocess_data_lazy(file_path): 
-    chunk_size = 1000000
-    writer = None
-    
-    try:
-        for i, chunk in enumerate(pd.read_csv(file_path, chunksize=chunk_size)):
-            # normalize timestamp column
-            chunk = process_chunk(chunk)
+        df = df.with_columns(
+            pl.col("timestamp")
+            .str.replace(r" UTC$", "")  
+            .str.strptime(
+                pl.Datetime, 
+                format="%Y-%m-%d %H:%M:%S%.f",
+                strict=False
+            )
+            .alias("timestamp")
+        )
 
-            #convert chunk to arrow table
-            table = pa.Table.from_pandas(chunk)
-
-            if writer is None:
-                writer = pq.ParquetWriter(
-                    "2022_place_canvas_history.parquet", table.schema, compression='snappy'
-                )
-
-            writer.write_table(table)
-            print(f"processed chunk {i+1}")
-
-    finally:
-        if writer:
-            writer.close()
-    
-    return
-
+        df = (
+            df.filter(
+                pl.col("coordinate").str.count_matches(",") == 1
+            )
+            .with_columns(
+                pl.col("coordinate")
+                .str.split_exact(",", 1)
+                .struct.field("field_0")
+                .cast(pl.Int64)
+                .alias("x"),
+                pl.col("coordinate")
+                .str.split_exact(",", 1)
+                .struct.field("field_1")
+                .cast(pl.Int64)
+                .alias("y"),
+                pl.col("user_id")
+                .cast(pl.Categorical).to_physical()
+            )
+            # .drop("coordinate")
+            )
         
-def main():
-    # get start time
-    start_time = time.perf_counter_ns()
+        df = df.drop("user_id")
 
-    # unzip
-    # unzip("../week1/2022_place_canvas_history.csv.gzip")
+        table = df.to_arrow()
 
-    # preprocess data
-    preprocess_data_lazy("2022_place_canvas_history.csv")
-    # preprocess_data_eager("2022_place_canvas_history.csv")
+        if parquet_writer is None:
+            parquet_writer = pq.ParquetWriter(
+                parquet_file, 
+                schema=table.schema, 
+                compression="zstd"
+            )
+        parquet_writer.write_table(table)
 
-    # get end_time
-    end_time = time.perf_counter_ns()
+finally:
+    if parquet_writer:
+        parquet_writer.close()
 
-    print(f"Execution time: {((end_time - start_time)//1000000)} ms")
-
-    return 0
-
-if __name__ == '__main__':
-    main()
+print(f"Successfully converted {csv_file} to {parquet_file}")
