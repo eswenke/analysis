@@ -16,6 +16,17 @@ def validate_input(start_date, start_hour, end_date, end_hour):
 
 def get_color_ranks(start, end):
     # report a ranking of colors during specified time range
+    print("getting color ranks...")
+    
+    result = ddb.sql(f"""
+        SELECT pixel_color, COUNT(*) AS count
+        FROM filtered
+        GROUP BY pixel_color
+        ORDER BY count DESC
+    """).fetchall()
+    
+    print(result)
+    print()
     
     return
 
@@ -23,17 +34,41 @@ def get_avg_session(start, end):
     # define a session as a user’s activity within a 15-minute window of inactivity. 
     # return the average session length in seconds during the specified timeframe. 
     # only include cases where a user had more than one pixel placement during the time period in the average.
+    print("getting average session...")
+    
+    # result = ddb.sql(f"""
+
+    # """).fetchall()
+    
+    # print(result)
+    print()
 
     return
 
 def get_pixel_percentiles(start, end):
     # calculate the 50th, 75th, 90th, and 99th percentiles 
     # of the number of pixels placed by users during the specified timeframe.
+    print("getting pixel percentiles...")
+    
+    # result = ddb.sql(f"""
+
+    # """).fetchall()
+    
+    # print(result)
+    print()
     
     return
 
 def get_first_time_users(start, end):
     # count how many users placed their first pixel ever within the specified timeframe
+    print("getting first time users...")
+    
+    # result = ddb.sql(f"""
+
+    # """).fetchall()
+    
+    # print(result)
+    print()
     
     return
 
@@ -42,31 +77,18 @@ def get_analysis(file_path, start, end):
     # might need to pass data into each function to get this to work
     data = ddb.read_parquet(file_path)
     
+    filtered = ddb.sql(f"""
+        SELECT *
+        FROM data
+        WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+    """).create_view("filtered")
+    
     get_color_ranks(start, end)
     get_avg_session(start, end)
     get_pixel_percentiles(start, end)
     get_first_time_users(start, end)
     
-    # query to get the max count of pixel_color and coordinate
-    result = ddb.sql(f"""
-        WITH pixel_color_counts AS (
-            SELECT pixel_color, COUNT(*) AS count
-            FROM data
-            WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-            GROUP BY pixel_color
-        ),
-        coordinate_counts AS (
-            SELECT coordinate, COUNT(*) AS count
-            FROM data
-            WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-            GROUP BY coordinate
-        )
-        SELECT 
-            (SELECT pixel_color FROM pixel_color_counts ORDER BY count DESC LIMIT 1) AS most_placed_color,
-            (SELECT coordinate FROM coordinate_counts ORDER BY count DESC LIMIT 1) AS most_placed_coordinate
-    """).fetchone()
-
-    return result[0], result[1]
+    return
 
 
 def main():
@@ -88,15 +110,13 @@ def main():
     start, end = validate_input(start_date, start_hour, end_date, end_hour)
     
     # get color and coord max for given time range
-    color, coord = get_analysis("../week2/2022pyarrow.parquet", start, end)
+    get_analysis("../week2/2022pyarrow.parquet", start, end)
         
     # get end_time
     end_time = time.perf_counter_ns()
-
+    
     print(f"time range: {start} to {end}")
     print(f"execution time: {((end_time - start_time)//1000000)} ms")
-    print(f"most placed color: {color}")
-    print(f"most placed coordinate: {coord}")
     
 if __name__ == '__main__':
     main()

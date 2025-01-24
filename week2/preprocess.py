@@ -49,11 +49,9 @@ try:
                 pl.col("user_id")
                 .cast(pl.Categorical).to_physical()
             )
-            # .drop("coordinate")
+            .drop("coordinate")
             )
         
-        df = df.drop("user_id")
-
         table = df.to_arrow()
 
         if parquet_writer is None:
