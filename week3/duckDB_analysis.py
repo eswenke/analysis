@@ -1,8 +1,8 @@
-import duckdb as ddb
 import sys
-import webcolors as wc
-from datetime import datetime
 import time
+import duckdb as ddb
+from colory.color import Color
+from datetime import datetime
 
 # check input is valid
 def validate_input(start_date, start_hour, end_date, end_hour):
@@ -24,8 +24,15 @@ def get_color_ranks(start, end):
         GROUP BY pixel_color
         ORDER BY count DESC
     """).fetchall()
-    
-    print(result)
+
+    for i, (color, count) in enumerate(result):
+        try:
+            c = Color(color, 'xkcd')
+            name = c.name
+        except ValueError:
+            name = "Unknown"
+        print(f"{name.ljust(20)} {str(count).rjust(7)}")
+
     print()
     
     return
@@ -62,17 +69,19 @@ def get_pixel_percentiles(start, end):
 def get_first_time_users(start, end, data):
     # count how many users placed their first pixel ever within the specified timeframe
     print("getting first time users...")
-    
-    # group by users and their 
-    result = ddb.sql(f"""
-        SELECT user_id, timestamp, 
-        FROM data
+
+    result2 = ddb.sql(f"""
+        WITH first_placements AS (
+            SELECT user_id, MIN(timestamp) as timestamp
+            FROM data
+            GROUP BY user_id
+        )
+        SELECT COUNT(*) as count
+        FROM first_placements
         WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-        GROUP BY user_id
-        ORDER BY timestamp DESC
     """).fetchall()
     
-    print(result)
+    print(result2[0][0])
     print()
     
     return
