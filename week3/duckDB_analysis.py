@@ -59,15 +59,20 @@ def get_pixel_percentiles(start, end):
     
     return
 
-def get_first_time_users(start, end):
+def get_first_time_users(start, end, data):
     # count how many users placed their first pixel ever within the specified timeframe
     print("getting first time users...")
     
-    # result = ddb.sql(f"""
-
-    # """).fetchall()
+    # group by users and their 
+    result = ddb.sql(f"""
+        SELECT user_id, timestamp, 
+        FROM data
+        WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+        GROUP BY user_id
+        ORDER BY timestamp DESC
+    """).fetchall()
     
-    # print(result)
+    print(result)
     print()
     
     return
@@ -86,7 +91,7 @@ def get_analysis(file_path, start, end):
     get_color_ranks(start, end)
     get_avg_session(start, end)
     get_pixel_percentiles(start, end)
-    get_first_time_users(start, end)
+    get_first_time_users(start, end, data)
     
     return
 
