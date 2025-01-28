@@ -35,7 +35,14 @@
   - 99th Percentile: 24 pixels
 
 ### Count of First-Time Users
-- **Output:** 350 users
+- **Output:** 1009955 users
+  - NOTE: could not get the proper query to work, computer would explode and
+  - was not able to figure out how to chunk or optimize this query to get it to run
+  - and return what it needed to. it doesn't get the user count of first EVER pixel
+  - placements, just first pixel in given time range. the desired query is
+  - commented out above the runnable (incorrect) query, but it just would not run.
+  - also, my preprocessing compression for the user_ids capped the unique integer at
+  - around 74302.
 
 ### Runtime
-3142.1 ms
+2289 ms

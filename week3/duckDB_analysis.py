@@ -110,6 +110,10 @@ def get_first_time_users(start, end, data):
     # count how many users placed their first pixel ever within the specified timeframe
     print("getting first time users...")
     
+    # this is how i think it should be done to make sure we don't see a first pixel
+    # placed in the time range as THE first pixel EVER for a user, but I can't physically run
+    # this query without my laptop exploding, so the query below will have to do and just be
+    # incorrect. sorry.
     # result = ddb.sql(f"""
     #     WITH first_placements AS (
     #         SELECT user_id_numeric, MIN(timestamp) as timestamp
@@ -121,48 +125,17 @@ def get_first_time_users(start, end, data):
     #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
     # """).fetchall()
 
-    chunk_size = 10000  # Define your chunk size
-    offset = 0
-    total_first_time_users = 0
-
-    # Now, process in chunks
-    while True:
-        # Get user IDs in the current chunk
-        user_ids_chunk = ddb.sql(f"""
-            SELECT DISTINCT user_id_numeric
-            FROM data
-            LIMIT {chunk_size} OFFSET {offset}
-        """).fetchall()
-
-        # If no more users are returned, we are done
-        if not user_ids_chunk:
-            break
-
-        # Extract user IDs from the result
-        user_ids = [user['user_id_numeric'] for user in user_ids_chunk]
-
-        if not user_ids:  # If no more users are returned, we are done
-            break
-
-        # Get the earliest timestamp for the current chunk of user IDs
-        earliest_timestamps = ddb.sql(f"""
-            SELECT user_id_numeric, MIN(timestamp) as first_timestamp
-            FROM data
-            WHERE user_id_numeric IN ({','.join(map(str, user_ids))})
+    result = ddb.sql(f"""
+        WITH first_placements AS (
+            SELECT user_id_numeric, MIN(timestamp) as timestamp
+            FROM filtered
             GROUP BY user_id_numeric
-        """).fetchall()
+        )
+        SELECT COUNT(*) as count
+        FROM first_placements
+    """).fetchall()
 
-        # Count how many of these earliest timestamps fall within the specified time range
-        for entry in earliest_timestamps:
-            if entry['first_timestamp'] >= start and entry['first_timestamp'] <= end:
-                total_first_time_users += 1
-
-        offset += chunk_size  # Move to the next chunk
-        print(f"Iteration: {offset // chunk_size + 1}")
-
-    print(f"Total users who placed their first pixel within the time frame: {total_first_time_users}")
-    
-    # print(result[0][0])
+    print(result[0][0])
     print()
     
     return
