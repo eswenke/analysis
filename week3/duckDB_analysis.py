@@ -121,6 +121,28 @@ def get_first_time_users(start, end):
     #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
     # """).fetchall()
 
+    chunk_size = 1000  # Define your chunk size
+    offset = 0
+    total_count = 0
+
+    while True:
+        result = ddb.sql(f"""
+            SELECT COUNT(*) as count
+            FROM first_placed
+            WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+            LIMIT {chunk_size} OFFSET {offset}
+        """).fetchall()
+
+        print(result)
+        
+        count = result[0]['count'] if result else 0
+        total_count += count
+        
+        if count < chunk_size:  # If fewer records were returned, we are done
+            break
+        
+        offset += chunk_size  # Move to the next chunk
+
     result = ddb.sql(f"""
         SELECT COUNT(*) as count
         FROM first_placed
