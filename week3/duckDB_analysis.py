@@ -110,38 +110,49 @@ def get_first_time_users(start, end, data):
     # count how many users placed their first pixel ever within the specified timeframe
     print("getting first time users...")
     
+    # result = ddb.sql(f"""
+    #     WITH first_placements AS (
+    #         SELECT user_id_numeric, MIN(timestamp) as timestamp
+    #         FROM data
+    #         GROUP BY user_id_numeric
+    #     )
+    #     SELECT COUNT(*) as count
+    #     FROM first_placements
+    #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+    # """).fetchall()
+
+    # chunk_size = 1000  # Define your chunk size
+    # offset = 0
+    # total_count = 0
+
+    # First, get the total count of first placements
     result = ddb.sql(f"""
-        WITH first_placements AS (
+        SELECT COUNT(*) as count
+        FROM (
             SELECT user_id_numeric, MIN(timestamp) as timestamp
             FROM data
             GROUP BY user_id_numeric
-        )
-        SELECT COUNT(*) as count
-        FROM first_placements
+        ) AS first_placements
         WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-    """).fetchall()
+    """).fetchall()[0]['count']
 
-    chunk_size = 1000  # Define your chunk size
-    offset = 0
-    total_count = 0
+    # while True:
+    #     result = ddb.sql(f"""
+    #         SELECT COUNT(*) as count
+    #         FROM first_placed
+    #         WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+    #         LIMIT {chunk_size} OFFSET {offset}
+    #     """).fetchall()
 
-    while True:
-        result = ddb.sql(f"""
-            SELECT COUNT(*) as count
-            FROM first_placed
-            WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-            LIMIT {chunk_size} OFFSET {offset}
-        """).fetchall()
-
-        print(result)
+    #     print(result)
         
-        count = result[0]['count'] if result else 0
-        total_count += count
+    #     count = result[0]['count'] if result else 0
+    #     total_count += count
         
-        if count < chunk_size:  # If fewer records were returned, we are done
-            break
+    #     if count < chunk_size:  # If fewer records were returned, we are done
+    #         break
         
-        offset += chunk_size  # Move to the next chunk
+    #     offset += chunk_size  # Move to the next chunk
 
     # result = ddb.sql(f"""
     #     SELECT COUNT(*) as count
