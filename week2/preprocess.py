@@ -51,7 +51,7 @@ try:
             )
             .drop("coordinate")
             )
-        
+                
         table = df.to_arrow()
 
         if parquet_writer is None:

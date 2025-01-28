@@ -45,29 +45,35 @@ def get_avg_session(start, end):
     # if 15 minutes passes and a pixel hasn't been placed in that time, the session is ended
     print("getting average session...")
     
-    # create a cte: for every user placement, add a lagged timestamp
-    # then go through that cte and calculate each user's average session length (case statement for each comparison)
-    # if i have previous session length that is less than 15 minutes, i add the current session length to it, and
-    # if 
-    # gather the results from that cte and take the total average.
     result = ddb.sql(f"""
         WITH lagged_timestamps AS (
             SELECT 
-                user_id,
-                LAG(timestamp) OVER (PARTITION BY user_id ORDER BY timestamp) AS session_length
+                user_id_numeric, 
+                timestamp,
+                DATE_DIFF('minute', LAG(timestamp) OVER (PARTITION BY user_id_numeric ORDER BY timestamp), timestamp) AS time_between
             FROM filtered
         ),
-        averages AS (
+        sessions AS (
             SELECT 
-                user_id,
-                AVG(session_length) AS avg_session_length
+                *,
+                SUM((CASE WHEN time_between >= 15 THEN 1 ELSE 0 END)) OVER (PARTITION BY user_id_numeric ORDER BY timestamp) AS session  
             FROM lagged_timestamps
-            GROUP BY user_id
+        ),
+        lengths AS (
+            SELECT
+                user_id_numeric,
+                session,
+                DATE_DIFF('second', MIN(timestamp), MAX(timestamp)) as session_length
+            FROM sessions
+            GROUP BY user_id_numeric, session
+            HAVING COUNT(*) > 1
+            ORDER BY user_id_numeric, session
         )
-
+        SELECT ROUND(AVG(session_length), 2)
+        FROM lengths
     """).fetchall()
     
-    print(result)
+    print(str(result[0][0]) + " seconds")
     print()
 
     return
@@ -78,16 +84,17 @@ def get_pixel_percentiles(start, end):
     print("getting pixel percentiles...")
     
     result = ddb.sql(f"""
-        SELECT 
-            PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY pixel_count ASC) AS percentile_50,
-            PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY pixel_count ASC) AS percentile_75,
-            PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY pixel_count ASC) AS percentile_90,
-            PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY pixel_count ASC) AS percentile_99
-        FROM (
-            SELECT user_id, COUNT(pixel_color) as pixel_count
+        WITH counts as (
+            SELECT user_id_numeric, COUNT(*) as count
             FROM filtered
-            GROUP BY user_id
-        ) AS user_pixel_counts;
+            GROUP BY user_id_numeric
+        )          
+        SELECT 
+            PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY count) AS percentile_50,
+            PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY count) AS percentile_75,
+            PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY count) AS percentile_90,
+            PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY count) AS percentile_99
+        FROM counts;
     """).fetchall()
     
     print(f"50th percentile: {result[0][0]}")
@@ -102,12 +109,12 @@ def get_pixel_percentiles(start, end):
 def get_first_time_users(start, end, data):
     # count how many users placed their first pixel ever within the specified timeframe
     print("getting first time users...")
-
+    
     result = ddb.sql(f"""
         WITH first_placements AS (
-            SELECT user_id, MIN(timestamp) as timestamp
+            SELECT user_id_numeric, MIN(timestamp) as timestamp
             FROM data
-            GROUP BY user_id
+            GROUP BY user_id_numeric
         )
         SELECT COUNT(*) as count
         FROM first_placements
@@ -157,7 +164,7 @@ def main():
     start, end = validate_input(start_date, start_hour, end_date, end_hour)
     
     # get color and coord max for given time range
-    get_analysis("../week2/2022pyarrow.parquet", start, end)
+    get_analysis("rplace.parquet", start, end)
         
     # get end_time
     end_time = time.perf_counter_ns()
