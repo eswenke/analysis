@@ -6,6 +6,8 @@ import csv
 from datetime import datetime
 import time
 
+# **************************** NOT USED FOR WEEK3 ANALYSIS **************************************
+
 # check input is valid
 def validate_input(start_date, start_hour, end_date, end_hour):
     start = datetime.strptime(f"{start_date} {start_hour}", "%Y-%m-%d %H")
