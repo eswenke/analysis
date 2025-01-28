@@ -106,20 +106,20 @@ def get_pixel_percentiles(start, end):
     
     return
 
-def get_first_time_users(start, end):
+def get_first_time_users(start, end, data):
     # count how many users placed their first pixel ever within the specified timeframe
     print("getting first time users...")
     
-    # result = ddb.sql(f"""
-    #     WITH first_placements AS (
-    #         SELECT user_id_numeric, MIN(timestamp) as timestamp
-    #         FROM data
-    #         GROUP BY user_id_numeric
-    #     )
-    #     SELECT COUNT(*) as count
-    #     FROM first_placements
-    #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-    # """).fetchall()
+    result = ddb.sql(f"""
+        WITH first_placements AS (
+            SELECT user_id_numeric, MIN(timestamp) as timestamp
+            FROM data
+            GROUP BY user_id_numeric
+        )
+        SELECT COUNT(*) as count
+        FROM first_placements
+        WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+    """).fetchall()
 
     chunk_size = 1000  # Define your chunk size
     offset = 0
@@ -143,11 +143,11 @@ def get_first_time_users(start, end):
         
         offset += chunk_size  # Move to the next chunk
 
-    result = ddb.sql(f"""
-        SELECT COUNT(*) as count
-        FROM first_placed
-        WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-    """).fetchall()
+    # result = ddb.sql(f"""
+    #     SELECT COUNT(*) as count
+    #     FROM first_placed
+    #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+    # """).fetchall()
     
     print(result[0][0])
     print()
@@ -165,16 +165,16 @@ def get_analysis(file_path, start, end):
         WHERE timestamp >= '{start}' AND timestamp <= '{end}'
     """).create_view("filtered")
     
-    first_placed = ddb.sql(f"""
-        SELECT user_id_numeric, MIN(timestamp) as timestamp
-        FROM data
-        GROUP BY user_id_numeric
-    """).create_view("first_placed")
+    # first_placed = ddb.sql(f"""
+    #     SELECT user_id_numeric, MIN(timestamp) as timestamp
+    #     FROM data
+    #     GROUP BY user_id_numeric
+    # """).create_view("first_placed")
     
     get_color_ranks(start, end)
     get_avg_session(start, end)
     get_pixel_percentiles(start, end)
-    get_first_time_users(start, end)
+    get_first_time_users(start, end, data)
     
     return
 
