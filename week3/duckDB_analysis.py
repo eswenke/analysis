@@ -121,24 +121,22 @@ def get_first_time_users(start, end, data):
     #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
     # """).fetchall()
 
-    chunk_size = 1000  # Define your chunk size
+    chunk_size = 10000  # Define your chunk size
     offset = 0
     total_first_time_users = 0
 
-    # First, get the total count of unique users
-    total_users = ddb.sql(f"""
-        SELECT COUNT(DISTINCT user_id_numeric) as count
-        FROM data
-    """).fetchall()[0]['count']
-
     # Now, process in chunks
-    while offset < total_users:
+    while True:
         # Get user IDs in the current chunk
         user_ids_chunk = ddb.sql(f"""
             SELECT DISTINCT user_id_numeric
             FROM data
             LIMIT {chunk_size} OFFSET {offset}
         """).fetchall()
+
+        # If no more users are returned, we are done
+        if not user_ids_chunk:
+            break
 
         # Extract user IDs from the result
         user_ids = [user['user_id_numeric'] for user in user_ids_chunk]
@@ -160,6 +158,7 @@ def get_first_time_users(start, end, data):
                 total_first_time_users += 1
 
         offset += chunk_size  # Move to the next chunk
+        print(f"Iteration: {offset // chunk_size + 1}")
 
     print(f"Total users who placed their first pixel within the time frame: {total_first_time_users}")
     
