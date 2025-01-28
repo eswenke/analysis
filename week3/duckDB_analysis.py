@@ -121,46 +121,49 @@ def get_first_time_users(start, end, data):
     #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
     # """).fetchall()
 
-    # chunk_size = 1000  # Define your chunk size
-    # offset = 0
-    # total_count = 0
+    chunk_size = 1000  # Define your chunk size
+    offset = 0
+    total_first_time_users = 0
 
-    # First, get the total count of first placements
-    result = ddb.sql(f"""
-        SELECT COUNT(*) as count
-        FROM (
-            SELECT user_id_numeric, MIN(timestamp) as timestamp
-            FROM data
-            GROUP BY user_id_numeric
-        ) AS first_placements
-        WHERE timestamp >= '{start}' AND timestamp <= '{end}'
+    # First, get the total count of unique users
+    total_users = ddb.sql(f"""
+        SELECT COUNT(DISTINCT user_id_numeric) as count
+        FROM data
     """).fetchall()[0]['count']
 
-    # while True:
-    #     result = ddb.sql(f"""
-    #         SELECT COUNT(*) as count
-    #         FROM first_placed
-    #         WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-    #         LIMIT {chunk_size} OFFSET {offset}
-    #     """).fetchall()
+    # Now, process in chunks
+    while offset < total_users:
+        # Get user IDs in the current chunk
+        user_ids_chunk = ddb.sql(f"""
+            SELECT DISTINCT user_id_numeric
+            FROM data
+            LIMIT {chunk_size} OFFSET {offset}
+        """).fetchall()
 
-    #     print(result)
-        
-    #     count = result[0]['count'] if result else 0
-    #     total_count += count
-        
-    #     if count < chunk_size:  # If fewer records were returned, we are done
-    #         break
-        
-    #     offset += chunk_size  # Move to the next chunk
+        # Extract user IDs from the result
+        user_ids = [user['user_id_numeric'] for user in user_ids_chunk]
 
-    # result = ddb.sql(f"""
-    #     SELECT COUNT(*) as count
-    #     FROM first_placed
-    #     WHERE timestamp >= '{start}' AND timestamp <= '{end}'
-    # """).fetchall()
+        if not user_ids:  # If no more users are returned, we are done
+            break
+
+        # Get the earliest timestamp for the current chunk of user IDs
+        earliest_timestamps = ddb.sql(f"""
+            SELECT user_id_numeric, MIN(timestamp) as first_timestamp
+            FROM data
+            WHERE user_id_numeric IN ({','.join(map(str, user_ids))})
+            GROUP BY user_id_numeric
+        """).fetchall()
+
+        # Count how many of these earliest timestamps fall within the specified time range
+        for entry in earliest_timestamps:
+            if entry['first_timestamp'] >= start and entry['first_timestamp'] <= end:
+                total_first_time_users += 1
+
+        offset += chunk_size  # Move to the next chunk
+
+    print(f"Total users who placed their first pixel within the time frame: {total_first_time_users}")
     
-    print(result[0][0])
+    # print(result[0][0])
     print()
     
     return
@@ -175,12 +178,6 @@ def get_analysis(file_path, start, end):
         FROM data
         WHERE timestamp >= '{start}' AND timestamp <= '{end}'
     """).create_view("filtered")
-    
-    # first_placed = ddb.sql(f"""
-    #     SELECT user_id_numeric, MIN(timestamp) as timestamp
-    #     FROM data
-    #     GROUP BY user_id_numeric
-    # """).create_view("first_placed")
     
     get_color_ranks(start, end)
     get_avg_session(start, end)
