@@ -1,10 +1,2 @@
 # WEEK5 REPORT NAME TBD
 Ethan Swenke
-
-## Ideas
-1. Most colorful user
-- Initially tried this approach, but the queries required could not be completed on Apache Spark without crashing the spark session and disallowing any further queries to be run unless I restarted the IDE. To inefficient to keep chasing.
-2. User with the most distance placed between pixels on average
-- Suffered the same fate as idea 1: not enough memory to do a meaningful query. Potentially possible to batch queries that cause this much grief, but I have a feeling that would be incredibly tedious and difficult to do correctly, assuming it is possible with what I want to do for these ideas.
-3. 1 time user statistics vs 2-25 vs 26-100 
-- Again, not enough memory. Going to try to do these ideas in duckDB and then come back to spark and try my hand at batching in some queries.
