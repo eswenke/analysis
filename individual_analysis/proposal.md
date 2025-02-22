@@ -1,0 +1,11 @@
+1. What question are you trying to answer?
+- I'm going to explore the question, or questions, surrounding reviewers and their reviews of Steam games.
+
+2. Why is this question worth answering? This can be either because it has some personal value to you or because it is a question that others are asking. If it is a question others are asking, then provide an example.
+- I grew up playing a variety of Steam games and still do to this day, so this dataset has some personal value to me. I also had an incredibly hard time finding a dataset big enough and exciting enough for me to dive in to, and this dataset has a lot of characteristics making it ripe for analysis. I think it would be interesting to analyze some reviews along with those who wrote them as well as what they wrote them for.
+
+3. What is your hypothesis? Why leads you towards that hypothesis?
+- I'm not exactly sure what my initial hypothesis is. I had plenty of questions that I wanted answers to upon first beginning to search for a dataset, but datasets large enough for this assignment do not exist or are very difficult to find for any of the questions I had. I stumbled upon this steam reviews dataset matching the characteristics I was looking for in a topic for analysis (i.e., large enough csv file with semi-interesting data) purely by chance, and so I'm more curious to play around with the data to form a hypothesis. Initially, I want to find out basic things like what the most popular game was, what the most reviewed game was, who the most active reviewer was, etc., along with the opposite of all those, but there is not one hypothesis that I particularly want to limit myself to at this early proposal stage prior to looking at the data some more.
+
+4. What is the primary dataset(s) you will use to answer the question? The dataset(s) must be at least 15GB in their original form when downloaded. Provide links. You may not choose r/place (any year) as your analysis set.
+- [Steam Reviews Dataset](https://www.kaggle.com/datasets/kieranpoc/steam-reviews/data)
