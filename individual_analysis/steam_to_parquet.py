@@ -24,7 +24,7 @@ try:
         df = pl.from_arrow(filtered_table) #, schema_overrides={"steam_china_location": pl.Utf8})
 
         # not needed
-        df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
+        df = df.drop(["hidden_in_steam_china", "recommendationid"])
 
         # largely shrinking from 64 to 32 where possible right now
         df = df.with_columns(
