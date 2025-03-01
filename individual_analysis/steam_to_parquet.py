@@ -21,7 +21,11 @@ try:
 
         df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
 
+        print("Columns:")
+        for col in df.columns:
+            print(f"  {col}: {df[col].dtype}")
         
+        break
 
         table = df.to_arrow()
 
