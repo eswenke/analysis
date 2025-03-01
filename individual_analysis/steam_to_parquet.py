@@ -55,8 +55,6 @@ try:
 
 except Exception as e:
     print("Error processing row:")
-    for col in df.columns:
-        print(f"{col}: {df.get(col).arr[index]}")
     print(f"Error message: {e}")
 
 finally:
