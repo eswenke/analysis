@@ -17,13 +17,10 @@ try:
     for record_batch in csv_reader:
         print(f"Processing batch with {record_batch.num_rows} rows...")
 
-        df = pl.from_arrow(record_batch)
+        df = pl.from_arrow(record_batch, schema_overrides={"steam_china_location": pl.Utf8})
 
         # not needed
         df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
-
-        # Confirm the columns have been dropped
-        print("Columns after drop:", df.columns)
 
         # largely shrinking from 64 to 32 where possible right now
         df = df.with_columns(
