@@ -27,7 +27,6 @@ try:
         # largely shrinking from 64 to 32 where possible right now
         df = df.with_columns(
             pl.col("weighted_vote_score").cast(pl.Float32).alias("weighted_vote_score"),
-            pl.col("appid").cast(pl.Utf8).alias("appid"),
             pl.col("author_num_games_owned").cast(pl.Int32).alias("author_num_games_owned"),
             pl.col("author_num_reviews").cast(pl.Int32).alias("author_num_reviews"),
             pl.col("author_playtime_forever").cast(pl.Int32).alias("author_playtime_forever"),
