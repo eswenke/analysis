@@ -22,7 +22,7 @@ try:
         df = pl.from_arrow(record_batch)
 
         # columns not needed
-        df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
+        df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid", "appid"])
 
         # largely shrinking from 64 to 32 where possible right now
         df = df.with_columns(
@@ -46,10 +46,10 @@ try:
             
         )
         
-        # 4.9 b value for both comment count and votes_funny, must be misinput?
+        # 4.9 b value for both comment count and votes_funny, must be downvoted comments (should be negative)
         df = df.with_columns([
-            pl.when(pl.col(col) >= 2_147_483_647)  # Max ui32 value
-            .then(pl.lit(0))  # Replace with 0
+            pl.when(pl.col(col) >= 2_147_483_647)  # Max i32 value
+            .then(pl.col(col) - 4_294_967_296)  # 2's comp wraparound
             .otherwise(pl.col(col))
             .cast(pl.Int32) 
             .alias(col)
