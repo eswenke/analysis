@@ -47,7 +47,7 @@ try:
         
         # 4.9 b value for both comment count and votes_funny, must be downvoted comments (should be negative)
         df = df.with_columns([
-            pl.when(pl.col(col) >= 2_147_483_647)  # Max i32 value
+            pl.when(pl.col(col) >= 2_147_483_647)  # max i32 value
             .then(pl.col(col) - 4_294_967_296)  # 2's comp wraparound
             .otherwise(pl.col(col))
             .cast(pl.Int32) 
