@@ -21,6 +21,10 @@ try:
 
         df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
 
+        print("First 10 values of weighted_vote_score:")
+        print(df["weighted_vote_score"][:10])
+        
+
         print("Columns:")
         for col in df.columns:
             print(f"  {col}: {df[col].dtype}")
