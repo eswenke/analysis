@@ -5,3 +5,4 @@ week2/*.parquet
 week3/*.parquet
 individual_analysis/*.zip
 individual_analysis/all_reviews/*.csv
+individual_analysis/all_reviews/*.parquet

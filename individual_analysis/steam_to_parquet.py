@@ -54,8 +54,7 @@ try:
         parquet_writer.write_table(table)
 
 except Exception as e:
-    print("Error processing row:")
-    print(f"Error message: {e}")
+    print(f"Error processing row: {e}")
 
 finally:
     if parquet_writer:
