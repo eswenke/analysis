@@ -38,11 +38,16 @@ try:
             pl.col("comment_count").cast(pl.Int32).alias("comment_count"),
             pl.col("steam_purchase").cast(pl.Int32).alias("steam_purchase"),
             pl.col("received_for_free").cast(pl.Int32).alias("received_for_free"),
-            pl.col("written_during_early_access").cast(pl.Int32).alias("written_during_early_access"),
-            pl.col("author_steamid").cast(pl.Int32).alias("author_steamid"),
-            # not for votes_funny, where max value above 32 bits? or right at it? need to check
+            pl.col("written_during_early_access").cast(pl.Int32).alias("written_during_early_access")
+            # pl.col("author_steamid").cast(pl.Int32).alias("author_steamid"),
+            # pl.col("votes_funny").cast(pl.Int32).alias("votes_funny"),
         )
 
+        # Assuming df is your DataFrame
+        for index, column in enumerate(df.columns):
+            print(f"Column index: {index}, Column name: {column}")
+
+        break
 
         table = df.to_arrow()
 
