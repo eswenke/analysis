@@ -5,8 +5,9 @@ import polars as pl
 csv_file = "all_reviews/all_reviews.csv"
 parquet_file = "all_reviews/all_reviews.parquet"
 
-# Read the entire CSV file into a record batch
-record_batch = pv.read_csv(csv_file)
+BLOCK_SIZE = 10_000_000  # Increase the block size (adjust as needed)
+read_options = pv.ReadOptions(block_size=BLOCK_SIZE)
+csv_reader = pv.open_csv(csv_file, read_options=read_options)
 
 # Convert the record batch to a Polars DataFrame
 df = pl.from_arrow(record_batch)
