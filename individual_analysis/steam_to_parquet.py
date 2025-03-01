@@ -17,15 +17,11 @@ try:
     for record_batch in csv_reader:
         print(f"Processing batch with {record_batch.num_rows} rows...")
 
-        df = pl.from_arrow(record_batch, schema_overrides={"steam_china_location": pl.Utf8})
+        column_names = record_batch.column_names
+        columns_to_keep = [col for col in column_names if col != 'steam_china_location']
+        filtered_table = record_batch.select(columns_to_keep)
 
-        # columns
-        print("Columns and their types:")
-        for col in df.columns:
-            print(f"{col}: {df[col].dtype}")
-        print()
-
-        break
+        df = pl.from_arrow(filtered_table) #, schema_overrides={"steam_china_location": pl.Utf8})
 
         # not needed
         df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
