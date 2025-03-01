@@ -19,7 +19,9 @@ try:
 
         df = pl.from_arrow(record_batch)
 
-               # Print the first 10 rows with all columns
+        df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendation_id"])
+
+        # Print the first 10 rows with all columns
         print(df.head(10))
         
         break
