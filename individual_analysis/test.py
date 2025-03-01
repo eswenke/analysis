@@ -7,7 +7,7 @@ parquet_file = "all_reviews/all_reviews.parquet"
 
 BLOCK_SIZE = 10_000_000  # Increase the block size (adjust as needed)
 read_options = pv.ReadOptions(block_size=BLOCK_SIZE)
-csv_reader = pv.open_csv(csv_file, read_options=read_options)
+record_batch = pv.read_csv(csv_file, read_options=read_options)
 
 # Convert the record batch to a Polars DataFrame
 df = pl.from_arrow(record_batch)
