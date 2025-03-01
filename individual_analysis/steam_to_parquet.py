@@ -19,17 +19,30 @@ try:
 
         df = pl.from_arrow(record_batch)
 
+        # not needed
         df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
 
-        print("First 10 values of weighted_vote_score:")
-        print(df["weighted_vote_score"][:10])
-        
+        # largely shrinking from 64 to 32 where possible right now
+        df = df.with_columns(
+            pl.col("weighted_vote_score").cast(pl.Float32).alias("weighted_vote_score"),
+            pl.col("appid").cast(pl.Utf8).alias("appid"),
+            pl.col("author_num_games_owned").cast(pl.Int32).alias("author_num_games_owned"),
+            pl.col("author_num_reviews").cast(pl.Int32).alias("author_num_reviews"),
+            pl.col("author_playtime_forever").cast(pl.Int32).alias("author_playtime_forever"),
+            pl.col("author_playtime_last_two_weeks").cast(pl.Int32).alias("author_playtime_last_two_weeks"),
+            pl.col("author_last_played").cast(pl.Int32).alias("author_last_played"),
+            pl.col("timestamp_created").cast(pl.Int32).alias("timestamp_created"),
+            pl.col("timestamp_updated").cast(pl.Int32).alias("timestamp_updated"),
+            pl.col("voted_up").cast(pl.Int32).alias("voted_up"),
+            pl.col("votes_up").cast(pl.Int32).alias("votes_up"),
+            pl.col("comment_count").cast(pl.Int32).alias("comment_count"),
+            pl.col("steam_purchase").cast(pl.Int32).alias("steam_purchase"),
+            pl.col("received_for_free").cast(pl.Int32).alias("received_for_free"),
+            pl.col("written_during_early_access").cast(pl.Int32).alias("written_during_early_access"),
+            pl.col("author_steamid").cast(pl.Int32).alias("author_steamid"),
+            # not for votes_funny, where max value above 32 bits? or right at it? need to check
+        )
 
-        print("Columns:")
-        for col in df.columns:
-            print(f"  {col}: {df[col].dtype}")
-        
-        break
 
         table = df.to_arrow()
 
