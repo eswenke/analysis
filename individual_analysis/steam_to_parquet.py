@@ -19,6 +19,14 @@ try:
 
         df = pl.from_arrow(record_batch, schema_overrides={"steam_china_location": pl.Utf8})
 
+        # columns
+        print("Columns and their types:")
+        for col in df.columns:
+            print(f"{col}: {df[col].dtype}")
+        print()
+
+        break
+
         # not needed
         df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
 
