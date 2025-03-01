@@ -18,13 +18,13 @@ try:
         print(f"Processing batch with {record_batch.num_rows} rows...")
 
         column_names = record_batch.column_names
-        columns_to_keep = [col for col in column_names if col != 'steam_china_location']
+        columns_to_keep = [col for col in column_names if col != 'steam_china_location' and col != 'hidden_in_steam_china' and col != 'recommendationid']
         filtered_table = record_batch.select(columns_to_keep)
 
-        df = pl.from_arrow(filtered_table) #, schema_overrides={"steam_china_location": pl.Utf8})
+        df = pl.from_arrow(filtered_table)
 
         # not needed
-        df = df.drop(["hidden_in_steam_china", "recommendationid"])
+        # df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
 
         # largely shrinking from 64 to 32 where possible right now
         df = df.with_columns(
