@@ -22,6 +22,9 @@ try:
         # not needed
         df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
 
+        # Confirm the columns have been dropped
+        print("Columns after drop:", df.columns)
+
         # largely shrinking from 64 to 32 where possible right now
         df = df.with_columns(
             pl.col("weighted_vote_score").cast(pl.Float32).alias("weighted_vote_score"),
