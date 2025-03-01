@@ -17,14 +17,10 @@ try:
     for record_batch in csv_reader:
         print(f"Processing batch with {record_batch.num_rows} rows...")
 
-        column_names = record_batch.column_names
-        columns_to_keep = [col for col in column_names if col != 'steam_china_location' and col != 'hidden_in_steam_china' and col != 'recommendationid']
-        filtered_table = record_batch.select(columns_to_keep)
+        df = pl.from_arrow(record_batch)
 
-        df = pl.from_arrow(filtered_table)
-
-        # not needed
-        # df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
+        # columns not needed
+        df = df.drop(["steam_china_location", "hidden_in_steam_china", "recommendationid"])
 
         # largely shrinking from 64 to 32 where possible right now
         df = df.with_columns(
@@ -63,5 +59,4 @@ except Exception as e:
 finally:
     if parquet_writer:
         parquet_writer.close()
-
-print(f"Successfully converted {csv_file} to {parquet_file}")
+    print(f"Successfully converted {csv_file} to {parquet_file}")
