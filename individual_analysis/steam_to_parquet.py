@@ -43,12 +43,6 @@ try:
             # pl.col("votes_funny").cast(pl.Int32).alias("votes_funny"),
         )
 
-        # Assuming df is your DataFrame
-        for index, column in enumerate(df.columns):
-            print(f"Column index: {index}, Column name: {column}")
-
-        break
-
         table = df.to_arrow()
 
         if parquet_writer is None:
@@ -58,6 +52,12 @@ try:
                 compression="zstd"
             )
         parquet_writer.write_table(table)
+
+except Exception as e:
+    print("Error processing row:")
+    for col in df.columns:
+        print(f"{col}: {df.get(col).arr[index]}")
+    print(f"Error message: {e}")
 
 finally:
     if parquet_writer:
