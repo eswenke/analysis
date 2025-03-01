@@ -8,9 +8,11 @@ parquet_file = "all_reviews/all_reviews.parquet"
 
 BLOCK_SIZE = 10_000_000
 
+# define expected column types (force all columns to be strings if unsure)
 read_options = pv.ReadOptions(block_size=BLOCK_SIZE)
-csv_reader = pv.open_csv(csv_file, read_options=read_options)
+convert_options = pv.ConvertOptions(column_types={"steam_china_location": pa.string()})  
 
+csv_reader = pv.open_csv(csv_file, read_options=read_options, convert_options=convert_options)
 parquet_writer = None
 
 try:
@@ -35,13 +37,24 @@ try:
             pl.col("timestamp_updated").cast(pl.Int32).alias("timestamp_updated"),
             pl.col("voted_up").cast(pl.Int32).alias("voted_up"),
             pl.col("votes_up").cast(pl.Int32).alias("votes_up"),
-            pl.col("comment_count").cast(pl.Int32).alias("comment_count"),
             pl.col("steam_purchase").cast(pl.Int32).alias("steam_purchase"),
             pl.col("received_for_free").cast(pl.Int32).alias("received_for_free"),
             pl.col("written_during_early_access").cast(pl.Int32).alias("written_during_early_access")
             # pl.col("author_steamid").cast(pl.Int32).alias("author_steamid"),
+            # pl.col("comment_count").cast(pl.Int32).alias("comment_count"),
             # pl.col("votes_funny").cast(pl.Int32).alias("votes_funny"),
+            
         )
+        
+        # 4.9 b value for both comment count and votes_funny, must be misinput?
+        df = df.with_columns([
+            pl.when(pl.col(col) >= 2_147_483_647)  # Max ui32 value
+            .then(pl.lit(0))  # Replace with 0
+            .otherwise(pl.col(col))
+            .cast(pl.Int32) 
+            .alias(col)
+            for col in ["comment_count", "votes_funny"]
+        ])
 
         table = df.to_arrow()
 
