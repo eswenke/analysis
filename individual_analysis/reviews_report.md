@@ -1,14 +1,11 @@
-# Largest Average Distance Between Consecutive Pixel Placements
+# Factors Impacting Game Review Score On Steam
 Ethan Swenke
 
 ## Idea
-I made a list of ideas for this week's report to try and find something unique about the r/place 2022 data set, and the one that ended up being the most fun and informative to pursue was that of average distance between pixel placements. I wanted to find who had the most spread out placements on average, and why. I didn't initially have a clear hypothesis for what I thought would come of this analysis, but the process definitely led me to some interesting discoveries. 
+In the Steam reviews dataset, there are several columns that give details about the author every every review for any given game. A couple of interesting columns in the dataset in relation to this are the 'received_for_free' and 'written_during_early_access' columns. I was intrigued by both of these columns and their effects on the overall positive or negative view of games. For games with the largest amounts of reviews, I would be able to get a good idea of how these columns' value could influence the overall perception of the game. Unfortunately we only know if the review was positive or not, so there won't be a sliding scale to a game's reception from the audience, but we can get a good idea.
 
 ## Implementation
 In order to analyze this, I used duckDB and ran a series of queries on the r/place dataset to get all users placements who had a minimum of 100 placed pixels over the course of the event. This would help alleviate any outliers and give my analysis a better chance to come to a more formal conclusion. I then took this data, sorted each user's placements by their timestamps, and calculated the euclidean distance between each consecutive pixel placement. I finally took the average euclidean distance (straight line from pixel to pixel) for each user, and sorted them to find the users with the highest average distance between their pixel placements. With this filtered data, I chose to single out the top three users in order to analyze more about them and their tendencies over the course of the r/place event.
-
-## PySpark
-I attempted to run this analysis in Apache Spark, but (surpise!) I ran into some memory errors that I could not resolve. I had to give up on that approach and instead went full in on duckDB. I'm going to be standing out front during the Potions party with a bucket if anyone has any spare change for a laptop that actually works.
 
 ## Results
 ### Percentiles
