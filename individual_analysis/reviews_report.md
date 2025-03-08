@@ -17,7 +17,7 @@ To begin, though, lets look at the average APR difference between those that pur
 - APR of reviewers who did not purchased: 50.915774
 - Difference: 2.900997
 
-So those who did not pay for their games and essentially got them for free actually had an APR of nearly 3% less than those that did purchase the game. This number fluctuates between 2.5% and 3.1% depending on how you filter the joined dataframe as I mentioned above, but the result is consistently less than the APR of those who purchased their games. Here are some more specifics on the difference based on different filters:
+So those who did not pay for their games and essentially got them for free actually had an APR of nearly 3% less than those that did purchase the game. This number fluctuates between 2.4% and 3.1% depending on how you filter the joined dataframe as I mentioned above, but the result is consistently less than the APR of those who purchased their games. Here are some more specifics on the difference based on different filters:
 
 - Difference when filtering on games with > 1000 reviews: 2.574916
 - Difference when filtering on games with > 10000 reviews: 2.925769
