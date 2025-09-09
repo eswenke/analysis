@@ -8,11 +8,11 @@ I made a list of ideas for this week's report to try and find something unique a
 In order to analyze this, I used duckDB and ran a series of queries on the r/place dataset to get all users placements who had a minimum of 100 placed pixels over the course of the event. This would help alleviate any outliers and give my analysis a better chance to come to a more formal conclusion. I then took this data, sorted each user's placements by their timestamps, and calculated the euclidean distance between each consecutive pixel placement. I finally took the average euclidean distance (straight line from pixel to pixel) for each user, and sorted them to find the users with the highest average distance between their pixel placements. With this filtered data, I chose to single out the top three users in order to analyze more about them and their tendencies over the course of the r/place event.
 
 ## PySpark
-I attempted to run this analysis in Apache Spark, but (surpise!) I ran into some memory errors that I could not resolve. I had to give up on that approach and instead went full in on duckDB. I'm going to be standing out front during the Potions party with a bucket if anyone has any spare change for a laptop that actually works.
+I attempted to run this analysis in Apache Spark, but I ran into some memory errors that I could not resolve. I had to give up on that approach and instead went full in on duckDB.
 
 ## Results
 ### Percentiles
-The user with the highest distance between pixel placements had an average euclidean distance of 1379.09 pixels, with the next 2 users following closely behind with 1341.88 and 1334.70 respectively. The grid was 2000 by 2000 pixels, so the max average distance was 69% of the max axis length (nice). Here are some percentiles to get an idea of the spread of this data:
+The user with the highest distance between pixel placements had an average euclidean distance of 1379.09 pixels, with the next 2 users following closely behind with 1341.88 and 1334.70 respectively. The grid was 2000 by 2000 pixels, so the max average distance was 69% of the max axis length. Here are some percentiles to get an idea of the spread of this data:
 - 50th percentile: 242.93 pixels
 - 75th percentile: 361.02 pixels
 - 90th percentile: 468.35 pixels
